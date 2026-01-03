@@ -8,7 +8,7 @@
 
 Developed by [Think Again Tattoo Removal](https://thinkagaintattooremoval.com) - Medical Laser Tattoo Removal.
 
-![Tattoo Color Analyzer Interface](docs/screenshots/demo-interface-800.png)
+![Tattoo Color Analyzer Interface](docs/screenshots/ai-tattoo-analyzer-gui.png)
 
 ## AI Features
 
