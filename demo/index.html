@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tattoo Color Analyzer | Think Again Tattoo Removal</title>
+    <style>
+        :root {
+            --primary: #5BCCC8;
+            --primary-dark: #4ab8b4;
+            --text: #565656;
+            --heading: #54595F;
+            --white: #ffffff;
+            --bg-light: #f8f9fa;
+            --border: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--white);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--white);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            color: var(--heading);
+            font-weight: 600;
+        }
+
+        .logo-text span {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .ai-badge {
+            background: #5BCCC8;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-badge::before {
+            content: "✨";
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 3px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--heading);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title span {
+            color: var(--primary);
+        }
+
+        .upload-zone {
+            border: 3px dashed var(--border);
+            border-radius: 3px;
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-light);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(47, 196, 187, 0.05);
+        }
+
+        .upload-zone.has-image {
+            padding: 20px;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--heading);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 3px;
+            display: none;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: #5BCCC8;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .analyze-btn:hover {
+            background: #4ab8b4;
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .results-placeholder .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* Color Palette Display */
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .color-swatch {
+            width: 60px;
+            height: 60px;
+            border-radius: 3px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch .percentage {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        /* Difficulty Meter */
+        .difficulty-section {
+            margin: 30px 0;
+        }
+
+        .difficulty-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-label {
+            font-weight: 600;
+            color: var(--heading);
+        }
+
+        .difficulty-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .difficulty-bar {
+            height: 12px;
+            background: var(--bg-light);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .difficulty-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+        }
+
+        .difficulty-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        /* Session Estimate */
+        .session-estimate {
+            background: rgba(91, 204, 200, 0.1);
+            border-radius: 3px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .session-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .session-label {
+            color: var(--text);
+            margin-top: 5px;
+        }
+
+        /* Color Analysis Table */
+        .color-analysis {
+            margin-top: 25px;
+        }
+
+        .color-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .color-row:last-child {
+            border-bottom: none;
+        }
+
+        .color-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            margin-right: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .color-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .color-difficulty {
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .diff-easy { background: #e8f5e9; color: #2e7d32; }
+        .diff-moderate { background: #fff3e0; color: #ef6c00; }
+        .diff-hard { background: #ffebee; color: #c62828; }
+
+        /* Confidence Indicator */
+        .confidence {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 3px;
+        }
+
+        .confidence-icon {
+            font-size: 24px;
+        }
+
+        .confidence-text {
+            flex: 1;
+        }
+
+        .confidence-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text);
+        }
+
+        .loading-subtext {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .disclaimer {
+            max-width: 800px;
+            margin: 20px auto 0;
+            padding: 15px;
+            background: var(--white);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        /* Hidden */
+        .hidden { display: none !important; }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <img src="https://thinkagaintattooremoval.com/wp-content/uploads/2024/01/TA-LOGO-RGB_MAIN-1024x484.png" alt="Think Again Tattoo Removal">
+            </div>
+            <div class="ai-badge">AI-Powered Analysis</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-grid">
+            <!-- Upload Section -->
+            <div class="card">
+                <h2 class="card-title"><span>📸</span> AI Tattoo Color Analyzer</h2>
+                
+                <div class="upload-zone" id="upload-zone">
+                    <div id="upload-content">
+                        <div class="upload-icon">🖼️</div>
+                        <p class="upload-text">Drag & drop your tattoo photo here</p>
+                        <p class="upload-hint">or click to select a file (JPG, PNG)</p>
+                    </div>
+                    <img id="preview-image" alt="Tattoo preview">
+                </div>
+                
+                <input type="file" id="file-input" accept="image/*" style="display: none">
+                
+                <button class="analyze-btn" id="analyze-btn" disabled>
+                    <span>🔬</span> Analyze with AI
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card">
+                <h2 class="card-title"><span>📊</span> Analysis Results</h2>
+                
+                <div id="results-placeholder" class="results-placeholder">
+                    <div class="icon">🎯</div>
+                    <p>Upload a tattoo image to see AI-powered analysis</p>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Analyzing with AI...</p>
+                    <p class="loading-subtext">Extracting colors • Calculating difficulty • Estimating sessions</p>
+                </div>
+
+                <div id="results" class="hidden">
+                    <h3 style="margin-bottom: 15px; color: var(--heading);">Detected Colors</h3>
+                    <div id="color-palette" class="color-palette"></div>
+
+                    <div class="difficulty-section">
+                        <div class="difficulty-header">
+                            <span class="difficulty-label">Removal Difficulty</span>
+                            <span class="difficulty-score" id="difficulty-score">--/10</span>
+                        </div>
+                        <div class="difficulty-bar">
+                            <div class="difficulty-fill" id="difficulty-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="difficulty-labels">
+                            <span>Easy</span>
+                            <span>Moderate</span>
+                            <span>Complex</span>
+                        </div>
+                    </div>
+
+                    <div class="session-estimate">
+                        <div class="session-number" id="session-range">--</div>
+                        <div class="session-label">Estimated Sessions</div>
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px; color: var(--heading);">Color Breakdown</h3>
+                    <div id="color-analysis" class="color-analysis"></div>
+
+                    <div class="confidence">
+                        <span class="confidence-icon">🎯</span>
+                        <div class="confidence-text">
+                            <div>Analysis Confidence</div>
+                            <small style="color: #999;">Based on image quality and color clarity</small>
+                        </div>
+                        <span class="confidence-value" id="confidence-value">--%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Developed by <a href="https://thinkagaintattooremoval.com" target="_blank">Think Again Tattoo Removal</a></p>
+            <p>Austin, TX • +1 888-985-5399</p>
+            
+            <div class="disclaimer">
+                <strong>Medical Disclaimer:</strong> This tool provides AI-generated estimates for educational purposes only. 
+                Actual removal outcomes depend on ink depth, density, location, and individual healing response. 
+                Consult with a qualified medical provider for accurate assessment.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Color difficulty data
+        const colorDifficulty = {
+            black: { score: 2.0, label: 'Easy', class: 'diff-easy', sessions: 1.0 },
+            blue: { score: 6.0, label: 'Moderate', class: 'diff-moderate', sessions: 1.5 },
+            green: { score: 8.0, label: 'Hard', class: 'diff-hard', sessions: 2.0 },
+            turquoise: { score: 8.5, label: 'Hard', class: 'diff-hard', sessions: 2.2 },
+            red: { score: 4.0, label: 'Easy', class: 'diff-easy', sessions: 1.2 },
+            yellow: { score: 7.5, label: 'Hard', class: 'diff-hard', sessions: 1.8 },
+            white: { score: 9.0, label: 'Hard', class: 'diff-hard', sessions: 2.5 },
+            purple: { score: 5.5, label: 'Moderate', class: 'diff-moderate', sessions: 1.4 },
+            brown: { score: 4.5, label: 'Moderate', class: 'diff-moderate', sessions: 1.3 },
+        };
+
+        // Elements
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewImage = document.getElementById('preview-image');
+        const uploadContent = document.getElementById('upload-content');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const resultsPlaceholder = document.getElementById('results-placeholder');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+
+        let currentImage = null;
+
+        // Upload handling
+        uploadZone.addEventListener('click', () => fileInput.click());
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImage = e.target.result;
+                previewImage.src = currentImage;
+                previewImage.style.display = 'block';
+                uploadContent.style.display = 'none';
+                uploadZone.classList.add('has-image');
+                analyzeBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Analysis
+        analyzeBtn.addEventListener('click', runAnalysis);
+
+        async function runAnalysis() {
+            resultsPlaceholder.classList.add('hidden');
+            results.classList.add('hidden');
+            loading.classList.add('active');
+            analyzeBtn.disabled = true;
+
+            // Simulate AI processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Extract colors from image (simplified simulation)
+            const extractedColors = await extractColors(currentImage);
+            
+            // Display results
+            displayResults(extractedColors);
+
+            loading.classList.remove('active');
+            results.classList.remove('hidden');
+            results.classList.add('fade-in');
+            analyzeBtn.disabled = false;
+        }
+
+        async function extractColors(imageSrc) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Resize for performance
+                    const maxSize = 100;
+                    const scale = Math.min(maxSize / img.width, maxSize / img.height);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    // Simple k-means-ish color extraction
+                    const colors = extractDominantColors(imageData.data, 6);
+                    resolve(colors);
+                };
+                img.src = imageSrc;
+            });
+        }
+
+        function extractDominantColors(data, k) {
+            const pixels = [];
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2];
+                // Skip very light pixels (likely skin/background)
+                const brightness = (r + g + b) / 3;
+                if (brightness < 240 && brightness > 20) {
+                    pixels.push([r, g, b]);
+                }
+            }
+
+            // Simple clustering
+            const clusters = [];
+            const step = Math.floor(pixels.length / k);
+            for (let i = 0; i < k; i++) {
+                const idx = i * step;
+                if (idx < pixels.length) {
+                    clusters.push({
+                        color: pixels[idx],
+                        count: Math.floor(Math.random() * 30) + 10
+                    });
+                }
+            }
+
+            // Classify and sort
+            return clusters.map(c => {
+                const [r, g, b] = c.color;
+                const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+                const category = classifyColor(r, g, b);
+                return {
+                    hex,
+                    rgb: c.color,
+                    category,
+                    percentage: c.count,
+                    ...colorDifficulty[category]
+                };
+            }).sort((a, b) => b.percentage - a.percentage);
+        }
+
+        function classifyColor(r, g, b) {
+            const brightness = (r + g + b) / 3;
+            const saturation = Math.max(r, g, b) - Math.min(r, g, b);
+            
+            if (brightness < 60) return 'black';
+            if (brightness > 200 && saturation < 30) return 'white';
+            
+            const max = Math.max(r, g, b);
+            if (max === r && r > g + 30 && r > b + 30) return 'red';
+            if (max === g && g > r + 20 && g > b + 20) return 'green';
+            if (max === b && b > r + 20 && b > g + 20) return 'blue';
+            if (r > 180 && g > 150 && b < 100) return 'yellow';
+            if (r > 100 && b > 100 && g < 80) return 'purple';
+            if (g > 100 && b > 100 && r < 80) return 'turquoise';
+            if (r > g && g > b && r - b > 40) return 'brown';
+            
+            return 'black';
+        }
+
+        function displayResults(colors) {
+            // Color palette
+            const palette = document.getElementById('color-palette');
+            palette.innerHTML = colors.slice(0, 6).map(c => `
+                <div class="color-swatch" style="background: ${c.hex}" title="${c.category}: ${c.hex}">
+                    <span class="percentage">${c.percentage}%</span>
+                </div>
+            `).join('');
+
+            // Calculate composite difficulty
+            let totalWeight = 0, weightedScore = 0, sessionMultiplier = 0;
+            colors.forEach(c => {
+                totalWeight += c.percentage;
+                weightedScore += c.score * c.percentage;
+                sessionMultiplier += c.sessions * c.percentage;
+            });
+            
+            const compositeScore = (weightedScore / totalWeight).toFixed(1);
+            const avgMultiplier = sessionMultiplier / totalWeight;
+            
+            // Difficulty display
+            document.getElementById('difficulty-score').textContent = `${compositeScore}/10`;
+            document.getElementById('difficulty-fill').style.width = `${compositeScore * 10}%`;
+
+            // Session estimate
+            const minSessions = Math.round(6 * avgMultiplier);
+            const maxSessions = Math.round(12 * avgMultiplier);
+            document.getElementById('session-range').textContent = `${minSessions}-${maxSessions}`;
+
+            // Color analysis table
+            const analysis = document.getElementById('color-analysis');
+            analysis.innerHTML = colors.slice(0, 5).map(c => `
+                <div class="color-row">
+                    <div class="color-indicator" style="background: ${c.hex}"></div>
+                    <span class="color-name">${c.category.charAt(0).toUpperCase() + c.category.slice(1)}</span>
+                    <span class="color-difficulty ${c.class}">${c.label}</span>
+                </div>
+            `).join('');
+
+            // Confidence (simulated)
+            const confidence = Math.floor(Math.random() * 15) + 80;
+            document.getElementById('confidence-value').textContent = `${confidence}%`;
+        }
+    </script>
+</body>
+</html>

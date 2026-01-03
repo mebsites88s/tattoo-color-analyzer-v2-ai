@@ -1,0 +1,21 @@
+# Core dependencies
+opencv-python>=4.8.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+Pillow>=10.0.0
+
+# AI/Deep Learning (required for full AI features)
+torch>=2.0.0
+torchvision>=0.15.0
+
+# SAM Segmentation (optional - install separately if needed)
+# pip install git+https://github.com/facebookresearch/segment-anything.git
+# segment-anything
+
+# MCP Server (optional - for Claude integration)
+# mcp>=0.1.0
+
+# Development
+# pytest>=7.0.0
+# black>=23.0.0
+# mypy>=1.0.0
